@@ -1,5 +1,5 @@
 const logger = require('../utils/logger');
-const NotifyResult = require('../http/NotifyResult');
+const NotifyResult = require('../results/notify');
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 

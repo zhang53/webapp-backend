@@ -3,62 +3,65 @@ const jwt = require('jsonwebtoken');
 const createError = require('http-errors');
 const { ObjectId } = require('mongodb');
 const authValidation = require('../validations/auth');
-const userModel = require('../models/user');
+const UserContainer = require('../containers/user');
 
-const register = async (body) => {
-  const validate = authValidation.register(body);
-
-  if (validate.error) {
-    throw createError(422, validate.error);
+class AuthService {
+  constructor() {
+    this._userContainer = new UserContainer();
   }
 
-  const { email } = body;
-  if (await userModel.countUsers({ email })) {
-    throw createError(409, 'Email has already been taken');
+  async register(body) {
+    const validate = authValidation.register(body);
+
+    if (validate.error) {
+      throw createError(422, validate.error);
+    }
+
+    const { email } = body;
+    if (await this._userContainer.countUsers({ email })) {
+      throw createError(409, 'Email has already been taken');
+    }
+
+    const { password } = body;
+    const salt = bcrypt.genSaltSync(10);
+    Object.assign(body, { password: bcrypt.hashSync(password, salt) });
+
+    return this._userContainer.createUser(body);
   }
 
-  const { password } = body;
-  const salt = bcrypt.genSaltSync(10);
-  Object.assign(body, { password: bcrypt.hashSync(password, salt) });
+  async login(body) {
+    const validate = authValidation.login(body);
 
-  return userModel.createUser(body);
-};
+    if (validate.error) {
+      throw createError(422, validate.error);
+    }
 
-const login = async (body) => {
-  const validate = authValidation.login(body);
+    const { username } = body;
+    const user = await this._userContainer.findUser({ email: username });
 
-  if (validate.error) {
-    throw createError(422, validate.error);
+    if (!user || !bcrypt.compareSync(body.password, user.password)) {
+      throw createError(401, 'Invalid username or password');
+    }
+
+    return user;
   }
 
-  const { username } = body;
-  const user = await userModel.findUser({ email: username });
+  findUserById(id) {
+    const validate = authValidation.findUserById({ id });
 
-  if (!user || !bcrypt.compareSync(body.password, user.password)) {
-    throw createError(401, 'Invalid username or password');
+    if (validate.error) {
+      throw createError(422, validate.error);
+    }
+
+    return this._userContainer.findUser({ _id: ObjectId(id) });
   }
 
-  return user;
-};
-
-const findUserById = (id) => {
-  const validate = authValidation.findUserById({ id });
-
-  if (validate.error) {
-    throw createError(422, validate.error);
+  static getToken(user, secret) {
+    return jwt.sign({
+      id: user._id.toString(),
+      email: user.email,
+    }, secret, { expiresIn: '2h' });
   }
+}
 
-  return userModel.findUser({ _id: ObjectId(id) });
-};
-
-const getToken = (user, secret) => jwt.sign({
-  id: user._id.toString(),
-  email: user.email,
-}, secret, { expiresIn: '2h' });
-
-module.exports = {
-  register,
-  login,
-  findUserById,
-  getToken,
-};
+module.exports = AuthService;

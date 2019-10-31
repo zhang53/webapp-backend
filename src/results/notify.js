@@ -1,4 +1,4 @@
-const JsonResult = require('./JsonResult');
+const JsonResult = require('./json');
 
 class NotifyResult extends JsonResult {
   constructor(message, data) {
