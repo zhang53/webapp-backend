@@ -1,7 +1,6 @@
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 const createError = require('http-errors');
 const { ObjectId } = require('mongodb');
+const { generatePasswordHash, validatePassword } = require('../utils/helper');
 const authValidation = require('../validations/auth');
 const UserContainer = require('../containers/user');
 
@@ -23,8 +22,7 @@ class AuthService {
     }
 
     const { password } = body;
-    const salt = bcrypt.genSaltSync(10);
-    Object.assign(body, { password: bcrypt.hashSync(password, salt) });
+    Object.assign(body, { password: generatePasswordHash(password) });
 
     return this._userContainer.createUser(body);
   }
@@ -39,7 +37,7 @@ class AuthService {
     const { username } = body;
     const user = await this._userContainer.findUser({ email: username });
 
-    if (!user || !bcrypt.compareSync(body.password, user.password)) {
+    if (!user || !validatePassword(body.password, user.password)) {
       throw createError(401, 'Invalid username or password');
     }
 
@@ -53,14 +51,7 @@ class AuthService {
       throw createError(422, validate.error);
     }
 
-    return this._userContainer.findUser({ _id: ObjectId(id) });
-  }
-
-  static getToken(user, secret) {
-    return jwt.sign({
-      id: user._id.toString(),
-      email: user.email,
-    }, secret, { expiresIn: '2h' });
+    return this._userContainer.findUser({ _id: ObjectId(id) }, { projection: { password: 0 } });
   }
 }
 

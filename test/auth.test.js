@@ -70,7 +70,7 @@ describe('Authentication', () => {
         .set('Authorization', global.bearerToken)
         .expect((res) => {
           res.status.should.equal(200);
-          res.body.user.email.should.equal(user.email);
+          res.body.data.email.should.equal(user.email);
         })
         .end(done);
     });

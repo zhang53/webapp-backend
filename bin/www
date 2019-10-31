@@ -93,5 +93,9 @@ function onListening() {
   debug(`Listening on ${bind}`);
 }
 
+/**
+ * Initialize database and start http server
+ */
+
 const db = Db(config.db.uri, config.db.name, config.db.options);
 db.initialize(startServer(), config.db.reconnectDelay);
