@@ -12,7 +12,6 @@ const config = {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     },
-    reconnectDelay: 10000,
   },
 };
 

@@ -1,28 +1,19 @@
-const mongodb = require('mongodb');
-const delay = require('delay');
+const { MongoClient } = require('mongodb');
 const logger = require('../utils/logger');
 
-const { MongoClient } = mongodb;
-
 class Db {
-  constructor() {
-    this._mongoClient = null;
-    this._db = null;
-    this._dbName = null;
+  connect(uri, options) {
+    this._client = new MongoClient(uri, options);
+    return this._client.connect();
   }
 
-  configure(uri, dbName, options) {
-    this._mongoClient = new MongoClient(uri, options || { useNewUrlParser: true });
-    this._dbName = dbName;
+  switchDatabase(dbName) {
+    this._db = this._client.db(dbName);
+    logger.info(`Switched to database [${dbName}]`);
   }
 
-  collection(collectionName) {
-    return this._db.collection(collectionName);
-  }
-
-  async connect() {
-    await this._mongoClient.connect();
-    this._db = this._mongoClient.db(this._dbName);
+  collection(name) {
+    return this._db.collection(name);
   }
 
   dropDatabase() {
@@ -30,29 +21,21 @@ class Db {
   }
 
   close(force) {
-    this._mongoClient.close(force);
+    return this._client.close(force);
   }
 
-  async initialize(cb, reconnectDelay = 5000) {
+  async initialize(uri, dbName, options) {
     try {
-      await this.connect();
+      await this.connect(uri, options);
       logger.info('Connected successfully to MongoDB');
-      return cb;
+      this.switchDatabase(dbName);
+      return true;
     } catch (err) {
-      logger.warn(`Unable to connect to MongoDB, retrying in ${reconnectDelay / 1000} seconds...`);
-      logger.error(err);
       this.close(true);
-      await delay(reconnectDelay);
-      return this.initialize(cb, reconnectDelay);
+      logger.error(err);
+      return false;
     }
   }
 }
 
-const instance = new Db();
-
-module.exports.Db = (uri, dbName, options) => {
-  instance.configure(uri, dbName, options);
-  return instance;
-};
-
-module.exports.db = instance;
+module.exports = new Db();

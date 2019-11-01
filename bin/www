@@ -8,7 +8,7 @@ const debug = require('debug')('webapp-backend:server');
 const http = require('http');
 const app = require('../src/app');
 const config = require('../src/config/app');
-const { Db } = require('../src/connection/db');
+const db = require('../src/connection/db');
 const logger = require('../src/utils/logger');
 
 /**
@@ -27,11 +27,9 @@ const server = http.createServer(app);
  * Listen on provided port, on all network interfaces.
  */
 
-function startServer() {
-  server.listen(port);
-  server.on('error', onError);
-  server.on('listening', onListening);
-}
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
 
 /**
  * Normalize a port into a number, string, or false.
@@ -94,8 +92,7 @@ function onListening() {
 }
 
 /**
- * Initialize database and start http server
+ * Connect to database
  */
 
-const db = Db(config.db.uri, config.db.name, config.db.options);
-db.initialize(startServer(), config.db.reconnectDelay);
+db.initialize(config.db.uri, config.db.name, config.db.options);
