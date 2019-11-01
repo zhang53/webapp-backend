@@ -1,10 +1,18 @@
-const winston = require('winston');
+const { createLogger, format, transports } = require('winston');
 
-const logger = winston.createLogger({
-  transports: [new winston.transports.Console()],
-  format: winston.format.combine(
-    winston.format.colorize({ all: true }),
-    winston.format.simple(),
+const {
+  combine, colorize, printf,
+} = format;
+
+const myFormat = printf(({ message }) => message);
+
+const logger = createLogger({
+  transports: [
+    new transports.Console(),
+  ],
+  format: combine(
+    colorize({ all: true }),
+    myFormat,
   ),
 });
 
