@@ -1,11 +1,16 @@
 require('dotenv').config();
+require('datejs');
 const { name } = require('../../package.json');
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 const config = {
   environment: NODE_ENV,
-  secret: process.env.JWT_SECRET || 'secret',
+  jwt: {
+    secret: process.env.JWT_SECRET || 'secret',
+    accessExp: Number(process.env.JWT_ACCESS_EXP || 3600), // Default to 1 hour
+    refreshExp: Number(process.env.JWT_REFRESH_EXP || 604800), // Default to 1 week
+  },
   db: {
     uri: process.env.DB_URI || 'mongodb://127.0.0.1:27017',
     name: process.env.DB_NAME || 'webapp',

@@ -1,7 +1,11 @@
 const jwt = require('jsonwebtoken');
 const auth = require('express-jwt');
+const crypto = require('crypto');
+const uuid = require('uuid/v4');
 const blacklist = require('express-jwt-blacklist');
 const config = require('../config/app');
+
+const refreshTokenList = {};
 
 if (config.environment === 'production') {
   blacklist.configure({
@@ -15,21 +19,44 @@ if (config.environment === 'production') {
 }
 
 const authorize = auth({
-  secret: config.secret,
+  secret: config.jwt.secret,
   isRevoked: blacklist.isRevoked,
 });
 
+const decodeToken = (err, req, res, next) => {
+  if (err.inner instanceof jwt.TokenExpiredError) {
+    const token = req.headers.authorization.split(' ')[1];
+    const { payload } = jwt.decode(token, { complete: true });
+    const exp = refreshTokenList[payload.refreshToken];
+
+    if (exp && new Date(exp).isAfter(new Date())) {
+      req.user = payload;
+
+      return next();
+    }
+  }
+
+  return next(err);
+};
+
 const revokeToken = ({ user }, res, next) => {
   blacklist.revoke(user);
+  delete refreshTokenList[user.refreshToken];
+
   next();
 };
 
-const getToken = ({ user, result }, res) => {
+const generateToken = ({ user, result }, res) => {
+  const refreshToken = crypto.createHash('sha256').update(uuid()).digest('hex');
+
   const token = jwt.sign({
     sub: user._id.toString(),
     email: user.email,
     permissions: user.permissions,
-  }, config.secret, { expiresIn: '2h' });
+    refreshToken,
+  }, config.jwt.secret, { expiresIn: config.jwt.accessExp });
+
+  refreshTokenList[refreshToken] = new Date().addSeconds(config.jwt.refreshExp);
 
   res.header('Authorization', token);
   res.json(result);
@@ -37,6 +64,7 @@ const getToken = ({ user, result }, res) => {
 
 module.exports = {
   authorize,
+  decodeToken,
   revokeToken,
-  getToken,
+  generateToken,
 };

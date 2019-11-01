@@ -1,5 +1,7 @@
 const express = require('express');
-const { authorize, revokeToken, getToken } = require('../middleware/jwtAuth');
+const {
+  authorize, decodeToken, revokeToken, generateToken,
+} = require('../middleware/jwtAuth');
 const JsonResult = require('../results/json');
 const NotifyResult = require('../results/notify');
 const AuthService = require('../services/auth');
@@ -25,9 +27,9 @@ router.post('/login', async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-}, getToken);
+}, generateToken);
 
-router.post('/logout', authorize, revokeToken, async (req, res, next) => {
+router.post('/logout', authorize, decodeToken, revokeToken, async (req, res, next) => {
   try {
     res.header('Authorization', null);
     res.send();
@@ -36,7 +38,7 @@ router.post('/logout', authorize, revokeToken, async (req, res, next) => {
   }
 });
 
-router.get('/refresh', authorize, revokeToken, async (req, res, next) => {
+router.get('/refresh', authorize, decodeToken, revokeToken, async (req, res, next) => {
   try {
     const authService = new AuthService();
     req.user = await authService.findUserById(req.user.sub);
@@ -44,7 +46,7 @@ router.get('/refresh', authorize, revokeToken, async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-}, getToken);
+}, generateToken);
 
 router.get('/user', authorize, async (req, res, next) => {
   try {
