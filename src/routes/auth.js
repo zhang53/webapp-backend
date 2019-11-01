@@ -29,6 +29,15 @@ router.post('/login', async (req, res, next) => {
   }
 });
 
+router.post('/logout', authorize, revoke, async (req, res, next) => {
+  try {
+    res.header('Authorization', null);
+    res.send();
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get('/refresh', authorize, revoke, async (req, res, next) => {
   try {
     const authService = new AuthService();
