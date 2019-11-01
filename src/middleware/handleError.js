@@ -1,13 +1,12 @@
 const logger = require('../utils/logger');
 const NotifyResult = require('../results/notify');
 
-const NODE_ENV = process.env.NODE_ENV || 'development';
-
-const sendHttpError = (err, res) => {
+// eslint-disable-next-line no-unused-vars
+const handleError = (err, req, res, next) => {
   res.status(err.status || 500);
 
   if (err instanceof Error) {
-    if (NODE_ENV === 'development') {
+    if (req.app.get('environment') === 'development') {
       logger.error(err.stack);
     }
 
@@ -17,4 +16,4 @@ const sendHttpError = (err, res) => {
   }
 };
 
-module.exports = sendHttpError;
+module.exports = handleError;

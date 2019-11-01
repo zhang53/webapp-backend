@@ -1,5 +1,5 @@
 const express = require('express');
-const authorize = require('../middleware/authorize');
+const { authorize } = require('../middleware/jwtAuth');
 const { getAuthToken } = require('../utils/helper');
 const JsonResult = require('../results/json');
 const NotifyResult = require('../results/notify');

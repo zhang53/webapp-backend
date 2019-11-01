@@ -3,10 +3,11 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const cookieParser = require('cookie-parser');
+const helmet = require('helmet');
 const logger = require('morgan');
 
 const config = require('./config/app');
-const sendError = require('./config/errors');
+const handleError = require('./middleware/handleError');
 
 const indexRouter = require('./routes/index');
 const authRouter = require('./routes/auth');
@@ -16,16 +17,18 @@ const app = express();
 
 // config setup
 app.set('secret', config.secret);
+app.set('environment', config.environment);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
 app.use(logger('dev'));
+app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, '../public')));
+app.use(helmet());
 app.use(cors({
   exposedHeaders: ['Authorization'],
   optionsSuccessStatus: 200,
@@ -42,8 +45,6 @@ app.use((req, res, next) => {
 });
 
 // error handler
-app.use((err, req, res, next) => {
-  next(sendError(err, res));
-});
+app.use(handleError);
 
 module.exports = app;

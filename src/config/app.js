@@ -3,6 +3,7 @@ require('dotenv').config();
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 const config = {
+  environment: NODE_ENV,
   secret: process.env.JWT_SECRET || 'secret',
   db: {
     uri: process.env.DB_URI || 'mongodb://127.0.0.1:27017',
