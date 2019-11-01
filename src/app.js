@@ -7,18 +7,12 @@ const compression = require('compression');
 const helmet = require('helmet');
 const logger = require('morgan');
 
-const config = require('./config/app');
 const handleError = require('./middleware/handleError');
 
 const indexRouter = require('./routes/index');
 const authRouter = require('./routes/auth');
-const usersRouter = require('./routes/users');
 
 const app = express();
-
-// config setup
-app.set('secret', config.secret);
-app.set('environment', config.environment);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -39,7 +33,6 @@ app.use(cors({
 // routes setup
 app.use('/', indexRouter);
 app.use('/api/auth', authRouter);
-app.use('/api/users', usersRouter);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {

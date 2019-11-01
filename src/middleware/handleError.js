@@ -1,3 +1,4 @@
+const config = require('../config/app');
 const logger = require('../utils/logger');
 const NotifyResult = require('../results/notify');
 
@@ -6,7 +7,7 @@ const handleError = (err, req, res, next) => {
   res.status(err.status || 500);
 
   if (err instanceof Error) {
-    if (req.app.get('environment') === 'development') {
+    if (config.environment === 'development') {
       logger.error(err.stack);
     }
 

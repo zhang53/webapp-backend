@@ -1,4 +1,5 @@
 require('dotenv').config();
+const { name } = require('../../package.json');
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
@@ -11,6 +12,20 @@ const config = {
     options: {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+    },
+  },
+  redis: {
+    host: process.env.REDIS_HOST || '127.0.0.1',
+    port: process.env.REDIS_PORT || '6379',
+  },
+  blacklist: {
+    type: process.env.BLACKLIST_TYPE || 'redis',
+    keyPrefix: `${name}:`,
+    host() {
+      return config[this.type].host;
+    },
+    port() {
+      return config[this.type].port;
     },
   },
 };
