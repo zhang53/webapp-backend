@@ -95,4 +95,4 @@ function onListening() {
  * Connect to database
  */
 
-db.initialize(config.db.uri, config.db.name, config.db.options);
+db.initialize(config.db.uri, config.db.name, config.db.options, config.db.reconnectDelay);

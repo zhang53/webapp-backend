@@ -19,6 +19,7 @@ const config = {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     },
+    reconnectDelay: Number(process.env.DB_RECONNECT_DELAY || 5000),
     get uri() {
       return `mongodb://${this.host}:${this.port}`;
     },

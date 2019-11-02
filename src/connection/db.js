@@ -1,3 +1,4 @@
+const delay = require('delay');
 const { MongoClient } = require('mongodb');
 const logger = require('../utils/logger');
 
@@ -24,15 +25,20 @@ class Db {
     return this._client.close(force);
   }
 
-  async initialize(uri, dbName, options) {
+  async initialize(uri, dbName, options, reconnectDelay) {
     try {
       await this.connect(uri, options);
       logger.info('Connected successfully to MongoDB');
       this.switchDatabase(dbName);
       return true;
     } catch (err) {
-      this.close(true);
       logger.error(err);
+      if (reconnectDelay) {
+        logger.warn(`Unable to connect to MongoDB, retrying in ${reconnectDelay / 1000} seconds...`);
+        this.close(true);
+        await delay(reconnectDelay);
+        return this.initialize(uri, dbName, options, reconnectDelay);
+      }
       return false;
     }
   }
