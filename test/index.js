@@ -1,3 +1,6 @@
+require('dotenv').config();
+require('datejs');
+
 require('./auth.test');
 
 const config = require('../src/config/app');
