@@ -12,24 +12,28 @@ const config = {
     refreshExp: Number(process.env.JWT_REFRESH_EXP || 604800), // Default to 1 week
   },
   db: {
-    uri: process.env.DB_URI || 'mongodb://127.0.0.1:27017',
+    host: process.env.DB_HOST || '127.0.0.1',
+    port: process.env.DB_PORT || 27017,
     name: process.env.DB_NAME || 'webapp',
     options: {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     },
+    get uri() {
+      return `mongodb://${this.host}:${this.port}`;
+    },
   },
   redis: {
     host: process.env.REDIS_HOST || '127.0.0.1',
-    port: process.env.REDIS_PORT || '6379',
+    port: process.env.REDIS_PORT || 6379,
   },
   blacklist: {
     type: process.env.BLACKLIST_TYPE || 'redis',
     keyPrefix: `${name}:`,
-    host() {
+    get host() {
       return config[this.type].host;
     },
-    port() {
+    get port() {
       return config[this.type].port;
     },
   },
@@ -37,7 +41,8 @@ const config = {
 
 if (NODE_ENV === 'test') {
   Object.assign(config.db, {
-    uri: process.env.DB_TEST_URI || 'mongodb://127.0.0.1:27017',
+    host: process.env.DB_TEST_HOST || '127.0.0.1',
+    port: process.env.DB_TEST_PORT || 27017,
     name: process.env.DB_TEST_NAME || 'webapp_test',
   });
 }

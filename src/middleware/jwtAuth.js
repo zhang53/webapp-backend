@@ -11,8 +11,8 @@ if (config.environment === 'production') {
   blacklist.configure({
     store: {
       type: config.blacklist.type,
-      host: config.blacklist.host(),
-      port: config.blacklist.port(),
+      host: config.blacklist.host,
+      port: config.blacklist.port,
       keyPrefix: config.blacklist.keyPrefix,
     },
   });
