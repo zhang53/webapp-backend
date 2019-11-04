@@ -3,25 +3,25 @@
 
 ## Project setup
 ```
-npm install
+`npm install`
 ```
 
 ### Run api in production mode
 ```
-npm start
+`npm run prod` or `npm run windows:prod`
 ```
 
 ### Run api in development mode
 ```
-npm run dev
+`npm run dev` or `npm run windows:dev`
 ```
 
 ### Run unit test
 ```
-npm test
+`npm test` or `npm run windows:test`
 ```
 
 ### Run eslint
 ```
-npm run lint
+`npm run lint`
 ```

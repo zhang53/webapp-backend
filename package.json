@@ -3,9 +3,14 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "NODE_ENV=production node ./bin/www",
-    "dev": "DEBUG=webapp-backend:* nodemon ./bin/www",
+    "start": "node ./bin/www",
+    "watch": "nodemon ./bin/www",
+    "prod": "NODE_ENV=production npm start",
+    "dev": "DEBUG=webapp-backend:* npm run watch",
     "test": "NODE_ENV=test mocha ./test/index.js --exit",
+    "windows:prod": "set NODE_ENV=production && npm start",
+    "windows:dev": "set DEBUG=webapp-backend:* && npm run watch",
+    "windows:test": "set NODE_ENV=test && mocha ./test/index.js --exit",
     "lint": "eslint ./ --fix"
   },
   "dependencies": {
